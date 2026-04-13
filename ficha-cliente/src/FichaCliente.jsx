@@ -1,0 +1,482 @@
+import { useState } from "react";
+
+// Google Fonts
+const fontLink = document.createElement("link");
+fontLink.rel = "stylesheet";
+fontLink.href = "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap";
+document.head.appendChild(fontLink);
+
+// ─── DADOS DE EXEMPLO ────────────────────────────────────────────────────────
+const dadosIniciais = {
+  info: {
+    nome: "C2G",
+    projeto: "Personal Brand",
+    nicho: "Marketing & Estratégia",
+    plataformas: "Instagram, LinkedIn",
+    responsavel: "Isa",
+    dataInicio: "Jan 2025",
+    status: "Ativo",
+    contato: "@brunochoran",
+  },
+  percepcoes: `Cliente altamente estratégico que valoriza conteúdo com profundidade. Prefere abordagens que educam antes de vender. Tem resistência a comunicações muito "salesy". Responde bem quando recebe contexto sobre o porquê das decisões.`,
+  reunioes: [
+    {
+      id: 1,
+      data: "10 Abr 2025",
+      tipo: "Estratégia Mensal",
+      participantes: "C2G, Isa, Naim",
+      resumo: "Alinhamento sobre pauta de conteúdo de Maio. Cliente pediu para intensificar posts sobre bastidores do processo criativo.",
+      acoes: ["Criar calendário de conteúdo para Maio", "Testar novo formato de carrossel com dados do mercado"],
+      status: "Concluída",
+    },
+    {
+      id: 2,
+      data: "18 Mar 2025",
+      tipo: "Revisão de Resultados",
+      participantes: "C2G, Isa",
+      resumo: "Análise dos últimos 30 dias. Reels performaram 3x mais que estáticos. Decidido dobrar produção de vídeo curto.",
+      acoes: ["Aumentar frequência de Reels para 3x/semana", "Testar thumbnail com rosto em close"],
+      status: "Concluída",
+    },
+    {
+      id: 3,
+      data: "28 Fev 2025",
+      tipo: "Onboarding",
+      participantes: "C2G, Isa, Naim, CS",
+      resumo: "Primeira reunião de alinhamento. Definido tom de voz, pilares de conteúdo e cadência de entregas.",
+      acoes: ["Entregar guia de tom de voz", "Configurar acesso às ferramentas", "Agendar próxima reunião"],
+      status: "Concluída",
+    },
+  ],
+  dos: [
+    "Usar linguagem direta e sem enrolação",
+    "Incluir dados e referências concretas nos posts",
+    "Mostrar bastidores do processo de trabalho",
+    "Perguntar opinião antes de mudanças grandes na estratégia",
+    "Enviar relatórios semanais toda segunda-feira",
+  ],
+  donts: [
+    "Usar CTAs genéricos como 'Comenta aqui!'",
+    "Postar conteúdo muito motivacional sem substância",
+    "Fazer alterações em posts já aprovados sem avisar",
+    "Atrasar relatório sem justificativa prévia",
+    "Usar muita gíria ou emojis em excesso",
+  ],
+  pedidos: [
+    { id: 1, descricao: "Série de 4 posts sobre IA aplicada a marketing", prioridade: "Alta", status: "Em andamento", data: "10 Abr 2025" },
+    { id: 2, descricao: "Roteiro para vídeo de apresentação do método C2G", prioridade: "Alta", status: "Pendente", data: "10 Abr 2025" },
+    { id: 3, descricao: "Revisão do bio do Instagram", prioridade: "Média", status: "Concluído", data: "18 Mar 2025" },
+    { id: 4, descricao: "Pesquisa de referências de criadores de conteúdo no nicho de estratégia", prioridade: "Baixa", status: "Concluído", data: "28 Fev 2025" },
+  ],
+  estrategias: [
+    { id: 1, nome: "Formato Pergunta + Resposta nos Reels", resultado: "+340% de alcance vs posts comuns", contexto: "Funciona especialmente quando a pergunta aparece nos primeiros 2 segundos do vídeo. Testado em março.", validadaEm: "Mar 2025" },
+    { id: 2, nome: "Carrossel Dados de Mercado", resultado: "+180% de salvamentos", contexto: "Posts com estatísticas do mercado de marketing digital viram referência. Público salva para compartilhar depois.", validadaEm: "Fev 2025" },
+    { id: 3, nome: "CTA direto pedindo DM", resultado: "12 leads qualificados em 1 semana", contexto: "No final de posts sobre estratégia, 'Se quiser aplicar isso no seu negócio, me manda mensagem'. Simples e efetivo.", validadaEm: "Mar 2025" },
+  ],
+  swipeFile: [
+    { id: 1, titulo: "Perfil de referência: Alex Hormozi", tipo: "Conta", url: "https://instagram.com/hormozi", descricao: "Referência máxima de copy direto, posts densos com valor real. Cliente admira o estilo.", tag: "Estilo de Conteúdo" },
+    { id: 2, titulo: "Carrossel Viral sobre Produtividade", tipo: "Post", url: "#", descricao: "Post que viralizou com 50k salvamentos. Formato: problema > solução > prova. Adaptar para o nicho.", tag: "Formato" },
+    { id: 3, titulo: "Estudo: Melhores horários para postar no Instagram 2025", tipo: "Artigo", url: "#", descricao: "18h-20h é o pico de engajamento para o nicho de negócios no Brasil.", tag: "Dado de Mercado" },
+  ],
+};
+
+// ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
+const T = {
+  bg: "#F4F6FA",
+  surface: "#FFFFFF",
+  surfaceHover: "#F8F9FC",
+  border: "#E8ECF4",
+  text: "#0D1117",
+  textMuted: "#6E7A99",
+  textLight: "#9BA5C0",
+  accent: "#5B6EF5",
+  accentLight: "#EEF0FE",
+  green: "#10B981",
+  greenLight: "#ECFDF5",
+  greenBorder: "#A7F3D0",
+  red: "#EF4444",
+  redLight: "#FFF1F2",
+  redBorder: "#FECDD3",
+  yellow: "#F59E0B",
+  yellowLight: "#FFFBEB",
+  shadow: "0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)",
+};
+
+// ─── STYLES ───────────────────────────────────────────────────────────────────
+const S = {
+  app: { fontFamily: "'Inter', -apple-system, sans-serif", background: T.bg, minHeight: "100vh", display: "flex", flexDirection: "column", color: T.text, fontSize: 14 },
+  header: { background: T.surface, borderBottom: `1px solid ${T.border}`, padding: "0 28px", height: 58, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100 },
+  headerLeft: { display: "flex", alignItems: "center", gap: 14 },
+  brandChip: { fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 11, letterSpacing: "0.12em", color: T.accent, background: T.accentLight, padding: "4px 10px", borderRadius: 6, textTransform: "uppercase" },
+  clientName: { fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 17, color: T.text },
+  clientSub: { fontSize: 12, color: T.textMuted, marginLeft: 4 },
+  body: { display: "flex", flex: 1 },
+  sidebar: { width: 210, background: T.surface, borderRight: `1px solid ${T.border}`, padding: "20px 12px", display: "flex", flexDirection: "column", gap: 2, flexShrink: 0, height: "calc(100vh - 58px)", position: "sticky", top: 58, overflowY: "auto" },
+  sidebarLabel: { fontSize: 10, fontWeight: 700, color: T.textLight, letterSpacing: "0.1em", textTransform: "uppercase", padding: "0 8px 8px" },
+  sidebarItem: (active) => ({ display: "flex", alignItems: "center", gap: 9, padding: "8px 10px", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: active ? 600 : 400, color: active ? T.accent : T.textMuted, background: active ? T.accentLight : "transparent", transition: "all 0.12s", userSelect: "none" }),
+  sidebarDot: (active) => ({ width: 6, height: 6, borderRadius: "50%", background: active ? T.accent : T.border, flexShrink: 0, transition: "background 0.12s" }),
+  main: { flex: 1, padding: "32px 36px", overflowY: "auto", height: "calc(100vh - 58px)" },
+  pageTitle: { fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, color: T.text, marginBottom: 20 },
+  card: { background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: 20, marginBottom: 16, boxShadow: T.shadow },
+  cardTitle: { fontSize: 11, fontWeight: 700, color: T.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 },
+  row: { display: "flex", alignItems: "center", gap: 10 },
+  input: { width: "100%", border: `1.5px solid ${T.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13.5, color: T.text, fontFamily: "inherit", background: T.surfaceHover, boxSizing: "border-box", outline: "none" },
+  textarea: { width: "100%", minHeight: 100, border: `1.5px solid ${T.border}`, borderRadius: 8, padding: "10px 12px", fontSize: 13.5, color: T.text, resize: "vertical", fontFamily: "inherit", lineHeight: 1.6, background: T.surfaceHover, boxSizing: "border-box", outline: "none" },
+  select: { border: `1.5px solid ${T.border}`, borderRadius: 8, padding: "8px 12px", fontSize: 13, fontFamily: "inherit", background: T.surfaceHover, color: T.text, cursor: "pointer", outline: "none", width: "100%" },
+  btn: (v) => ({ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "inherit", background: v === "primary" ? T.accent : v === "ghost" ? "transparent" : T.accentLight, color: v === "primary" ? "#fff" : v === "ghost" ? T.textMuted : T.accent }),
+  divider: { height: 1, background: T.border, margin: "16px 0" },
+  formGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 },
+  formGroup: { display: "flex", flexDirection: "column", gap: 5, marginBottom: 12 },
+  label: { fontSize: 11, fontWeight: 600, color: T.textMuted, textTransform: "uppercase", letterSpacing: "0.07em" },
+};
+
+// ─── BADGE ────────────────────────────────────────────────────────────────────
+const Badge = ({ children, variant = "default" }) => {
+  const map = {
+    success: { bg: T.greenLight, color: "#059669", border: T.greenBorder },
+    danger:  { bg: T.redLight,   color: "#DC2626", border: T.redBorder },
+    warning: { bg: T.yellowLight, color: "#D97706", border: "#FDE68A" },
+    blue:    { bg: T.accentLight, color: T.accent,  border: "#C7D2FE" },
+    default: { bg: T.bg,          color: T.textMuted, border: T.border },
+  };
+  const s = map[variant] || map.default;
+  return <span style={{ display: "inline-flex", alignItems: "center", background: s.bg, color: s.color, border: `1px solid ${s.border}`, borderRadius: 20, padding: "2px 10px", fontSize: 11.5, fontWeight: 600, whiteSpace: "nowrap" }}>{children}</span>;
+};
+
+const statusV = (s) => s === "Concluído" || s === "Concluída" ? "success" : s === "Em andamento" ? "blue" : "warning";
+const prioV   = (p) => p === "Alta" ? "danger" : p === "Média" ? "warning" : "default";
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+const TABS = [
+  { id: "visao",       label: "Visão Geral"   },
+  { id: "reunioes",    label: "Reuniões"       },
+  { id: "dos",         label: "Do's & Don'ts"  },
+  { id: "pedidos",     label: "Pedidos"        },
+  { id: "estrategias", label: "Estratégias"    },
+  { id: "swipe",       label: "Swipe File"     },
+];
+
+// ─── STATS ────────────────────────────────────────────────────────────────────
+function StatsBar({ dados }) {
+  const stats = [
+    { label: "Reuniões", value: dados.reunioes.length },
+    { label: "Pedidos abertos", value: dados.pedidos.filter(p => p.status !== "Concluído").length },
+    { label: "Estratégias", value: dados.estrategias.length },
+    { label: "Referências", value: dados.swipeFile.length },
+  ];
+  return (
+    <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
+      {stats.map(s => (
+        <div key={s.label} style={{ flex: 1, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, padding: "14px 16px", boxShadow: T.shadow }}>
+          <div style={{ fontSize: 24, fontWeight: 800, color: T.accent, fontFamily: "'Syne', sans-serif" }}>{s.value}</div>
+          <div style={{ fontSize: 11.5, color: T.textMuted, marginTop: 2 }}>{s.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── VISÃO GERAL ──────────────────────────────────────────────────────────────
+function VisaoGeral({ dados, onChange }) {
+  const campos = [["Nome", "nome"], ["Projeto", "projeto"], ["Nicho", "nicho"], ["Plataformas", "plataformas"], ["Responsável", "responsavel"], ["Início", "dataInicio"], ["Contato", "contato"], ["Status", "status"]];
+  return (
+    <div>
+      <div style={S.pageTitle}>Visão Geral</div>
+      <div style={S.card}>
+        <div style={S.cardTitle}>Informações do Cliente</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16 }}>
+          {campos.map(([label, key]) => (
+            <div key={key}>
+              <div style={S.label}>{label}</div>
+              <input style={{ ...S.input, marginTop: 5, padding: "7px 10px", fontSize: 13, background: "#fff" }} value={dados.info[key]} onChange={e => onChange("info", { ...dados.info, [key]: e.target.value })} />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={S.card}>
+        <div style={S.cardTitle}>Percepções & Notas</div>
+        <p style={{ fontSize: 12, color: T.textLight, marginBottom: 10, lineHeight: 1.5 }}>Comportamento, preferências, sensibilidades — tudo que o time precisa saber.</p>
+        <textarea style={S.textarea} value={dados.percepcoes} onChange={e => onChange("percepcoes", e.target.value)} placeholder="Registre suas percepções sobre o cliente..." />
+      </div>
+    </div>
+  );
+}
+
+// ─── REUNIÕES ─────────────────────────────────────────────────────────────────
+function Reunioes({ dados, onChange }) {
+  const [aberta, setAberta] = useState(null);
+  const [nova, setNova] = useState(false);
+  const [form, setForm] = useState({ data: "", tipo: "", participantes: "", resumo: "", acoes: "", status: "Concluída" });
+
+  const salvar = () => {
+    onChange("reunioes", [{ id: Date.now(), ...form, acoes: form.acoes.split("\n").filter(Boolean) }, ...dados.reunioes]);
+    setNova(false);
+    setForm({ data: "", tipo: "", participantes: "", resumo: "", acoes: "", status: "Concluída" });
+  };
+
+  return (
+    <div>
+      <div style={{ ...S.row, justifyContent: "space-between", marginBottom: 20 }}>
+        <div style={S.pageTitle}>Reuniões</div>
+        <button style={S.btn("primary")} onClick={() => setNova(!nova)}>{nova ? "Cancelar" : "+ Nova Reunião"}</button>
+      </div>
+      {nova && (
+        <div style={{ ...S.card, borderColor: T.accent, borderWidth: 2 }}>
+          <div style={S.cardTitle}>Registrar Reunião</div>
+          <div style={S.formGrid}>
+            <div style={S.formGroup}><div style={S.label}>Data</div><input style={S.input} value={form.data} onChange={e => setForm({ ...form, data: e.target.value })} placeholder="10 Abr 2025" /></div>
+            <div style={S.formGroup}><div style={S.label}>Tipo</div><input style={S.input} value={form.tipo} onChange={e => setForm({ ...form, tipo: e.target.value })} placeholder="Estratégia Mensal" /></div>
+          </div>
+          <div style={S.formGroup}><div style={S.label}>Participantes</div><input style={S.input} value={form.participantes} onChange={e => setForm({ ...form, participantes: e.target.value })} placeholder="C2G, Isa, Naim" /></div>
+          <div style={S.formGroup}><div style={S.label}>Resumo</div><textarea style={S.textarea} value={form.resumo} onChange={e => setForm({ ...form, resumo: e.target.value })} placeholder="O que foi discutido..." /></div>
+          <div style={S.formGroup}><div style={S.label}>Ações (uma por linha)</div><textarea style={{ ...S.textarea, minHeight: 72 }} value={form.acoes} onChange={e => setForm({ ...form, acoes: e.target.value })} placeholder={"Criar calendário de Maio\nEnviar relatório até sexta"} /></div>
+          <div style={S.row}><button style={S.btn("primary")} onClick={salvar}>Salvar</button><button style={S.btn("ghost")} onClick={() => setNova(false)}>Cancelar</button></div>
+        </div>
+      )}
+      {dados.reunioes.map(r => (
+        <div key={r.id} style={S.card}>
+          <div style={{ ...S.row, justifyContent: "space-between", cursor: "pointer", userSelect: "none" }} onClick={() => setAberta(aberta === r.id ? null : r.id)}>
+            <div style={S.row}>
+              <span style={{ fontWeight: 600, fontSize: 13.5 }}>{r.data}</span>
+              <span style={{ color: T.textMuted, fontSize: 13 }}>· {r.tipo}</span>
+            </div>
+            <div style={S.row}>
+              <Badge variant={statusV(r.status)}>{r.status}</Badge>
+              <span style={{ color: T.textLight, fontSize: 11 }}>{aberta === r.id ? "▲" : "▼"}</span>
+            </div>
+          </div>
+          {aberta === r.id && (
+            <>
+              <div style={S.divider} />
+              <div style={{ marginBottom: 10 }}><span style={S.label}>Participantes: </span><span style={{ fontSize: 13 }}>{r.participantes}</span></div>
+              <div style={{ marginBottom: 12 }}><div style={{ ...S.label, marginBottom: 5 }}>Resumo</div><p style={{ fontSize: 13.5, lineHeight: 1.65, color: "#2D3451" }}>{r.resumo}</p></div>
+              <div><div style={{ ...S.label, marginBottom: 6 }}>Próximos Passos</div>
+                {r.acoes.map((a, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 6 }}>
+                    <span style={{ marginTop: 3, width: 14, height: 14, borderRadius: 4, border: `1.5px solid ${T.border}`, display: "inline-block", flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, lineHeight: 1.5 }}>{a}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── DO'S & DON'TS ────────────────────────────────────────────────────────────
+function DosDonts({ dados, onChange }) {
+  const [novoDo, setNovoDo] = useState("");
+  const [novoDont, setNovoDont] = useState("");
+
+  const Col = ({ title, color, light, border, items, onRemove, value, onChg, onAdd }) => (
+    <div style={{ ...S.card, marginBottom: 0 }}>
+      <div style={{ ...S.cardTitle, color }}>{title}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+        {items.map((item, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", background: light, border: `1px solid ${border}`, borderRadius: 8, padding: "9px 12px", gap: 10 }}>
+            <span style={{ fontSize: 13, lineHeight: 1.5 }}>{item}</span>
+            <button onClick={() => onRemove(i)} style={{ background: "none", border: "none", cursor: "pointer", color: T.textLight, fontSize: 13, padding: 0, flexShrink: 0 }}>✕</button>
+          </div>
+        ))}
+      </div>
+      <div style={{ ...S.row, gap: 8 }}>
+        <input style={{ ...S.input, flex: 1 }} value={value} onChange={e => onChg(e.target.value)} placeholder="Adicionar..." onKeyDown={e => e.key === "Enter" && onAdd()} />
+        <button style={{ ...S.btn("primary"), padding: "8px 14px" }} onClick={onAdd}>+</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <div style={S.pageTitle}>Do's & Don'ts</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <Col title="✓  Do's — O que funciona" color={T.green} light={T.greenLight} border={T.greenBorder} items={dados.dos} onRemove={i => onChange("dos", dados.dos.filter((_, idx) => idx !== i))} value={novoDo} onChg={setNovoDo} onAdd={() => { if (novoDo.trim()) { onChange("dos", [...dados.dos, novoDo.trim()]); setNovoDo(""); } }} />
+        <Col title="✕  Don'ts — O que evitar" color={T.red} light={T.redLight} border={T.redBorder} items={dados.donts} onRemove={i => onChange("donts", dados.donts.filter((_, idx) => idx !== i))} value={novoDont} onChg={setNovoDont} onAdd={() => { if (novoDont.trim()) { onChange("donts", [...dados.donts, novoDont.trim()]); setNovoDont(""); } }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── PEDIDOS ──────────────────────────────────────────────────────────────────
+function Pedidos({ dados, onChange }) {
+  const [novo, setNovo] = useState(false);
+  const [form, setForm] = useState({ descricao: "", prioridade: "Média", status: "Pendente" });
+
+  const salvar = () => {
+    const d = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+    onChange("pedidos", [{ id: Date.now(), ...form, data: d }, ...dados.pedidos]);
+    setNovo(false);
+    setForm({ descricao: "", prioridade: "Média", status: "Pendente" });
+  };
+
+  const updateStatus = (id, status) => onChange("pedidos", dados.pedidos.map(p => p.id === id ? { ...p, status } : p));
+
+  return (
+    <div>
+      <div style={{ ...S.row, justifyContent: "space-between", marginBottom: 20 }}>
+        <div style={S.pageTitle}>Pedidos do Cliente</div>
+        <button style={S.btn("primary")} onClick={() => setNovo(!novo)}>{novo ? "Cancelar" : "+ Novo Pedido"}</button>
+      </div>
+      {novo && (
+        <div style={{ ...S.card, borderColor: T.accent, borderWidth: 2 }}>
+          <div style={S.cardTitle}>Registrar Pedido</div>
+          <div style={S.formGroup}><div style={S.label}>Descrição</div><textarea style={{ ...S.textarea, minHeight: 60 }} value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} placeholder="O que o cliente pediu..." /></div>
+          <div style={S.formGrid}>
+            <div style={S.formGroup}><div style={S.label}>Prioridade</div><select style={S.select} value={form.prioridade} onChange={e => setForm({ ...form, prioridade: e.target.value })}><option>Alta</option><option>Média</option><option>Baixa</option></select></div>
+            <div style={S.formGroup}><div style={S.label}>Status</div><select style={S.select} value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}><option>Pendente</option><option>Em andamento</option><option>Concluído</option></select></div>
+          </div>
+          <div style={S.row}><button style={S.btn("primary")} onClick={salvar}>Salvar</button><button style={S.btn("ghost")} onClick={() => setNovo(false)}>Cancelar</button></div>
+        </div>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {dados.pedidos.map(p => (
+          <div key={p.id} style={{ ...S.card, marginBottom: 0, display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 3, height: 44, borderRadius: 4, flexShrink: 0, background: p.prioridade === "Alta" ? T.red : p.prioridade === "Média" ? T.yellow : T.border }} />
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 13.5, fontWeight: 500, marginBottom: 6 }}>{p.descricao}</p>
+              <div style={S.row}><Badge variant={prioV(p.prioridade)}>{p.prioridade}</Badge><span style={{ fontSize: 11.5, color: T.textLight }}>{p.data}</span></div>
+            </div>
+            <select style={{ ...S.select, width: "auto", fontSize: 12, padding: "6px 10px" }} value={p.status} onChange={e => updateStatus(p.id, e.target.value)}>
+              <option>Pendente</option><option>Em andamento</option><option>Concluído</option>
+            </select>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── ESTRATÉGIAS ──────────────────────────────────────────────────────────────
+function Estrategias({ dados, onChange }) {
+  const [nova, setNova] = useState(false);
+  const [form, setForm] = useState({ nome: "", resultado: "", contexto: "", validadaEm: "" });
+  const salvar = () => { onChange("estrategias", [{ id: Date.now(), ...form }, ...dados.estrategias]); setNova(false); setForm({ nome: "", resultado: "", contexto: "", validadaEm: "" }); };
+  const cores = [T.accent, "#10B981", "#F59E0B", "#8B5CF6", "#EF4444"];
+
+  return (
+    <div>
+      <div style={{ ...S.row, justifyContent: "space-between", marginBottom: 20 }}>
+        <div style={S.pageTitle}>Estratégias Validadas</div>
+        <button style={S.btn("primary")} onClick={() => setNova(!nova)}>{nova ? "Cancelar" : "+ Adicionar"}</button>
+      </div>
+      {nova && (
+        <div style={{ ...S.card, borderColor: T.accent, borderWidth: 2, marginBottom: 20 }}>
+          <div style={S.cardTitle}>Nova Estratégia</div>
+          {[["Nome", "nome", "Ex: Formato Pergunta + Resposta"], ["Resultado", "resultado", "Ex: +340% de alcance"], ["Validada em", "validadaEm", "Ex: Mar 2025"]].map(([label, key, ph]) => (
+            <div key={key} style={S.formGroup}><div style={S.label}>{label}</div><input style={S.input} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })} placeholder={ph} /></div>
+          ))}
+          <div style={S.formGroup}><div style={S.label}>Contexto</div><textarea style={S.textarea} value={form.contexto} onChange={e => setForm({ ...form, contexto: e.target.value })} placeholder="Quando e como funciona..." /></div>
+          <div style={S.row}><button style={S.btn("primary")} onClick={salvar}>Salvar</button><button style={S.btn("ghost")} onClick={() => setNova(false)}>Cancelar</button></div>
+        </div>
+      )}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: 16 }}>
+        {dados.estrategias.map((e, idx) => (
+          <div key={e.id} style={{ ...S.card, marginBottom: 0, borderTop: `3px solid ${cores[idx % cores.length]}`, display: "flex", flexDirection: "column" }}>
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>{e.nome}</div>
+            <div style={{ display: "inline-flex", alignItems: "center", background: T.greenLight, color: T.green, borderRadius: 20, padding: "3px 10px", fontSize: 11.5, fontWeight: 700, marginBottom: 12, width: "fit-content" }}>📈 {e.resultado}</div>
+            <p style={{ fontSize: 13, color: T.textMuted, lineHeight: 1.6, flex: 1, marginBottom: 12 }}>{e.contexto}</p>
+            <div style={S.label}>{e.validadaEm}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── SWIPE FILE ───────────────────────────────────────────────────────────────
+function SwipeFile({ dados, onChange }) {
+  const [nova, setNova] = useState(false);
+  const [form, setForm] = useState({ titulo: "", tipo: "Post", url: "", descricao: "", tag: "" });
+  const salvar = () => { onChange("swipeFile", [{ id: Date.now(), ...form }, ...dados.swipeFile]); setNova(false); setForm({ titulo: "", tipo: "Post", url: "", descricao: "", tag: "" }); };
+  const tagBg   = ["#E0E7FF", "#D1FAE5", "#FEF3C7", "#FCE7F3", "#DBEAFE", "#F3E8FF"];
+  const tagText = ["#4338CA", "#065F46", "#92400E", "#9D174D", "#1E40AF", "#6B21A8"];
+
+  return (
+    <div>
+      <div style={{ ...S.row, justifyContent: "space-between", marginBottom: 20 }}>
+        <div style={S.pageTitle}>Swipe File & Referências</div>
+        <button style={S.btn("primary")} onClick={() => setNova(!nova)}>{nova ? "Cancelar" : "+ Adicionar"}</button>
+      </div>
+      {nova && (
+        <div style={{ ...S.card, borderColor: T.accent, borderWidth: 2, marginBottom: 20 }}>
+          <div style={S.cardTitle}>Nova Referência</div>
+          <div style={S.formGrid}>
+            <div style={S.formGroup}><div style={S.label}>Título</div><input style={S.input} value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} placeholder="Nome da referência" /></div>
+            <div style={S.formGroup}><div style={S.label}>Tipo</div><select style={S.select} value={form.tipo} onChange={e => setForm({ ...form, tipo: e.target.value })}><option>Post</option><option>Conta</option><option>Artigo</option><option>Vídeo</option><option>Campanha</option></select></div>
+          </div>
+          <div style={S.formGrid}>
+            <div style={S.formGroup}><div style={S.label}>URL</div><input style={S.input} value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://..." /></div>
+            <div style={S.formGroup}><div style={S.label}>Tag / Categoria</div><input style={S.input} value={form.tag} onChange={e => setForm({ ...form, tag: e.target.value })} placeholder="Formato, Estilo..." /></div>
+          </div>
+          <div style={S.formGroup}><div style={S.label}>Por que é relevante</div><textarea style={{ ...S.textarea, minHeight: 70 }} value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} placeholder="O que tem de bom nessa referência..." /></div>
+          <div style={S.row}><button style={S.btn("primary")} onClick={salvar}>Salvar</button><button style={S.btn("ghost")} onClick={() => setNova(false)}>Cancelar</button></div>
+        </div>
+      )}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: 16 }}>
+        {dados.swipeFile.map((item, idx) => (
+          <div key={item.id} style={{ ...S.card, marginBottom: 0, display: "flex", flexDirection: "column" }}>
+            <div style={{ ...S.row, justifyContent: "space-between", marginBottom: 10 }}>
+              <Badge variant="default">{item.tipo}</Badge>
+              <span style={{ fontSize: 11, fontWeight: 700, background: tagBg[idx % tagBg.length], color: tagText[idx % tagText.length], padding: "2px 8px", borderRadius: 6 }}>{item.tag}</span>
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>{item.titulo}</div>
+            <p style={{ fontSize: 13, color: T.textMuted, lineHeight: 1.55, flex: 1, marginBottom: 14 }}>{item.descricao}</p>
+            {item.url && item.url !== "#" ? <a href={item.url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: T.accent, fontWeight: 600, textDecoration: "none" }}>Ver referência →</a> : <span style={{ fontSize: 12, color: T.textLight }}>Sem link</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────────────────────
+export default function FichaCliente() {
+  const [dados, setDados] = useState(dadosIniciais);
+  const [aba, setAba] = useState("visao");
+  const update = (campo, valor) => setDados(prev => ({ ...prev, [campo]: valor }));
+
+  const renderContent = () => {
+    switch (aba) {
+      case "visao":       return <><StatsBar dados={dados} /><VisaoGeral dados={dados} onChange={update} /></>;
+      case "reunioes":    return <Reunioes dados={dados} onChange={update} />;
+      case "dos":         return <DosDonts dados={dados} onChange={update} />;
+      case "pedidos":     return <Pedidos dados={dados} onChange={update} />;
+      case "estrategias": return <Estrategias dados={dados} onChange={update} />;
+      case "swipe":       return <SwipeFile dados={dados} onChange={update} />;
+      default: return null;
+    }
+  };
+
+  return (
+    <div style={S.app}>
+      <div style={S.header}>
+        <div style={S.headerLeft}>
+          <span style={S.brandChip}>CLIENTE XPTO</span>
+          <div>
+            <span style={S.clientName}>{dados.info.nome}</span>
+            <span style={S.clientSub}>· {dados.info.projeto}</span>
+          </div>
+        </div>
+        <div style={S.row}>
+          <Badge variant="success">{dados.info.status}</Badge>
+          <span style={{ fontSize: 12, color: T.textMuted }}>Responsável: <strong>{dados.info.responsavel}</strong></span>
+        </div>
+      </div>
+      <div style={S.body}>
+        <nav style={S.sidebar}>
+          <div style={S.sidebarLabel}>Navegação</div>
+          {TABS.map(tab => (
+            <div key={tab.id} style={S.sidebarItem(aba === tab.id)} onClick={() => setAba(tab.id)}>
+              <div style={S.sidebarDot(aba === tab.id)} />
+              {tab.label}
+            </div>
+          ))}
+        </nav>
+        <main style={S.main}>{renderContent()}</main>
+      </div>
+    </div>
+  );
+}
